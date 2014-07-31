@@ -83,4 +83,5 @@ def map_view(request):
 def tracker_view(request):
 	canvases = Canvas.objects.all()
 
-	return render(request, 'paintr/tracker.html', {'canvases': canvases})
+	#return render(request, 'paintr/tracker.html', {'canvases': canvases})
+	return render(request, 'paintr/brush.html', {'canvases': canvases})

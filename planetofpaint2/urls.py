@@ -2,6 +2,8 @@ from django.conf.urls import patterns, include, url
 
 from django.contrib import admin
 admin.autodiscover()
+from django.conf.urls.static import static
+from django.conf import settings
 
 from paintr import views
 
@@ -16,4 +18,4 @@ urlpatterns = patterns('',
     url(r'^paintr/api/send$', views.receive_data),
     url(r'^grappelli/', include('grappelli.urls')), # grappelli URLS
     url(r'^admin/', include(admin.site.urls)),
-)
+) + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
