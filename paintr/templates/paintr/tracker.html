@@ -56,8 +56,7 @@
 				<input type="text" id="newName"></input>
 				<button id="newNameBut">Create</button>
 			</div>
-			<button id="startB" class="button" type="button" onclick="start()">Start</button>
-			<button id="stopB" class="button" type="button" onclick="stop()">Stop</button>
+			<button id="startB" class="button" type="button">Start Painting</button>
 			</div>
 		</div>
 
@@ -72,8 +71,6 @@
 			var url = 'paintr/api/send';
 
 			var startButton = document.getElementById('startB')
-			var stopB 		= document.getElementById('stopB')
-			stopB.disabled = true;
 
 			var newNameDiv = document.getElementById("newNameDiv");
 			newNameDiv.style.display = "none";
@@ -90,7 +87,9 @@
 
 			};
 
-			function start() {
+
+
+			function start(){
 				selection = document.getElementById('canvas').value;
 				if (selection === 'non' && newName.value === '') {
 					x.innerHTML = 'Type in a name for the new canvas';
@@ -99,17 +98,16 @@
 					newNameDiv.style.display = "none";
 					intervalID = setInterval(function(){getLocation()}, 1000);
 					startB.style.backgroundColor = "red";
-					startB.disabled = true;
-					stopB.disabled = false;
+					startB.innerHTML = 'Lift brush'
 					started = true;
 				}
 			}
 
-			function stop () {
+			function stop (){
+				started = false;
 				clearInterval(intervalID)
 				startB.style.backgroundColor = "blue";
-				startB.disabled = false;
-				stopB.disabled = true;
+				startB.innerHTML = 'Start Painting'
 				x.innerHTML = 'Hit start again to keep tracking'
 
 				var xmlhttp = new XMLHttpRequest();
@@ -120,6 +118,14 @@
 			    }));
 			    data = [];
 			}
+
+			startB.onclick = function(){
+				if (started) {
+					stop();
+				} else{
+					start();
+				};
+			};
 
 			function getLocation() {
 			    if (navigator.geolocation) {
