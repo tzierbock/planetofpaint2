@@ -1,5 +1,7 @@
-from django.shortcuts import render
-from django.http import XMLHttpRequest
+from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponse
+
+from datetime import datetime
 
 import json
 from models import Canvas, Point
@@ -7,8 +9,9 @@ from models import Canvas, Point
 
 #create new canvas from user request
 def create_canvas(request):
+	respons = 'Failure'
 	if request.method == 'POST':
-		data = json.load(request.body)
+		data = json.loads(request.body)
 
 		newName = data['title']
 		uuid = newName.replace(' ', '').lower() #remove spaces and make lower case
@@ -22,16 +25,63 @@ def create_canvas(request):
 
 		newC.save()
 
-		return XMLHttpRequest('OK')
+		respons = 'OK'
+
+	
+	return HttpResponse(json.load({'respons':respons}))
 
 
 #data handeling
 def receive_data(request):
-	pass
+	respons = 'Failure'
+	if request.method == 'POST':
+		data = json.loads(request.body)
 
-def send_data(request):
-	pass
+		canvas = get_object_or_404(Canvas, pk=data['uuid'])
+
+		for point in data['points']:
+			newP = Point()
+			newP.latitude = point['latitude']
+			newP.longitude = point['longitude']
+
+			newP.creation_time = datetime.now()
+			newP.canvas = canvas
+
+			newP.save()
+
+		respons = str(len(data['points']))
+
+	return HttpResponse(json.dumps({'respons':respons}))
+
+def get_data(request):
+	outData = {'respons':'Failure'}
+	if request.method == 'POST':
+		data = json.loads(request.body)
+
+		uuid = data['uuid']
+		canvas = get_object_or_404(Canvas, pk=uuid)
+
+		points = Point.objects.filter(canvas=canvas)
+
+		pointData = [[p.latitude, p.longitude] for p in points]
+
+		outData = {
+			'canvas': uuid,
+			'points': pointData,
+			'respons': 'OK',
+		}
+
+	return HttpResponse(json.dumps(outData))
+
+
 
 #map view
-def map_view():
-	pass
+def map_view(request):
+	canvases = Canvas.objects.all()
+
+	return render(request, 'paintr/map.html', {'canvases': canvases})
+
+def tracker_view(request):
+	canvases = Canvas.objects.all()
+
+	return render(request, 'paintr/tracker.html', {'canvases': canvases})

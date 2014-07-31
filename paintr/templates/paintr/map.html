@@ -1,0 +1,92 @@
+<html>
+	<head>
+		<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+		<script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+
+		<style>
+			.sidebar {
+				width: 100%;
+				height: 5%;
+			}
+
+			.map {
+				width: 100%;
+				height: 95%;
+			}
+		</style>
+
+	</head>
+	<body>
+		<h1 id="error"></h1>
+		<div class="toolbar" id="toolbar">
+			<select class="button" name="bitton" id="button">
+				<option value="non">Select a canwas you want to view</option>
+				{% for c in canvases %}
+					<option value="{{ c.uuid }}">{{ c.title }}</option>
+				{% endfor %}
+			</select>
+
+		</div>
+		<div id='map' class='map'></div>
+
+		<script>
+			var url = 'paintr/api/data/get'
+			var map = L.map('map').setView([55.9531, -3.1889], 15);
+
+			L.tileLayer('http://{s}.tiles.mapbox.com/v3/tomzierbock.j3dn793e/{z}/{x}/{y}.png', {
+    			attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+   				maxZoom: 20
+			}).addTo(map);
+
+			var getJSON = function(url, uuid, successHandler, errorHandler) {
+  				var xhr = typeof XMLHttpRequest != 'undefined'
+    					? new XMLHttpRequest()
+   						: new ActiveXObject('Microsoft.XMLHTTP');
+  				xhr.open('post', url, true);
+  				xhr.onreadystatechange = function() {
+    				var status;
+   					var data;
+    				// http://xhr.spec.whatwg.org/#dom-xmlhttprequest-readystate
+    				if (xhr.readyState == 4) { // `DONE`
+      					status = xhr.status;
+      					if (status == 200) {
+        					data = JSON.parse(xhr.responseText);
+        					successHandler && successHandler(data);
+      					} else {
+      						document.getElementById('error').innerHtml = xhr.responseText;
+        					errorHandler && errorHandler(status);
+      					}
+    				}
+  				};
+
+  				xhr.send(JSON.stringify({'uuid':uuid}));
+			};
+
+			var successHandler = function(data){
+				if (data['respons'] == 'Failure') {
+					document.getElementById('error').innerHtml = "error"
+					return;
+				};
+
+				var points = data['points'];
+				var polyline = L.polyline(points, {color: 'red'}).addTo(map);
+			};
+
+			var errorHandler = function(status){
+
+			};
+
+
+			document.getElementById('button').onchange = function (){
+				uuid = document.getElementById('button').value;
+
+				if (uuid != 'non') {
+					getJSON(url, uuid, successHandler, errorHandler);
+				};
+
+			};
+
+		</script>
+
+	</body>
+</html>

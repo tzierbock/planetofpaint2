@@ -1,0 +1,112 @@
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, user-scalable=no">
+		
+
+		<style>
+			.button {
+				width: 100%;
+				height: 5em;
+				background-color: blue;
+				color: white;
+				font-size: 2em;
+			}
+
+			.button-wrapper {
+				padding: 0.5em;
+			}
+
+			.container {
+				width: 20em;
+				margin: 2em auto 2em auto;
+				background-color: lightgrey;
+			}
+
+			.container h1 {
+				display: block;
+				width: 100%;
+				height: 2em;
+				background-color: lightblue;
+				padding: 0;
+				margin: 0;
+				text-align: center;
+			}
+
+
+		</style>
+
+	</head>
+	
+
+	<body>
+		<div class="container">
+			<h1>Tracker</h1>
+			<p id="label"></p>
+
+			<div class="button-wrapper">
+			<select class="button" name="canvas" id="canvas">
+				<option value="non">Please select a canvas to paint on</option>
+				{% for c in canvases %}
+					<option value="{{ c.uuid }}">{{ c.title }}</option>
+				{% endfor %}
+			</select>
+			<br/>
+			<button id="startB" class="button" type="button" onclick="start()">Start</button>
+			<button id="stopB" class="button" type="button" onclick="stop()">Stop</button>
+			</div>
+		</div>
+
+		<script>
+
+			var x = document.getElementById("label");
+			x.innerHTML = "Hit start to beging tracking"
+			var intervalID;
+			var selection;
+			var started = false;
+			var data = [];
+			var url = 'paintr/api/send'
+
+			function start() {
+				selection = document.getElementById('canvas').value;
+				if (selection === 'non') {
+					x.innerHTML = 'Warning: No canvas selected';
+					started = true;
+				} else {
+					intervalID = setInterval(function(){getLocation()}, 2000);
+				}
+			}
+
+			function stop () {
+				clearInterval(intervalID)
+				x.innerHTML = 'Hit start again to keep tracking'
+
+				var xmlhttp = new XMLHttpRequest();
+			    xmlhttp.open("POST", url, true);
+			    xmlhttp.send(JSON.stringify({
+			    	'uuid': selection,
+			    	'points':data,
+			    }));
+			    data = [];
+			}
+
+			function getLocation() {
+			    if (navigator.geolocation) {
+			        navigator.geolocation.getCurrentPosition(savePosition);
+			    } else {
+			        x.innerHTML = "Geolocation is not supported by this browser.";
+			        started = false;
+			        clearInterval(intervalID);
+			    }
+			}
+
+			function savePosition(position){
+				data.push({
+					'latitude': position.coords.latitude, 
+					'longitude': position.coords.longitude,
+				});
+			}
+
+		</script>
+
+	</body>
+</html>
