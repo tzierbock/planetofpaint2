@@ -1,6 +1,6 @@
 <html>
 	<head>
-		<meta name="viewport" content="width=device-width, user-scalable=no">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 		
 
 		<style>
@@ -51,6 +51,11 @@
 				{% endfor %}
 			</select>
 			<br/>
+			<div id="newNameDiv" class="newNameDiv">
+				<h2>Enter a name</h2>
+				<input type="text" id="newName"></input>
+				<button id="newNameBut">Create</button>
+			</div>
 			<button id="startB" class="button" type="button" onclick="start()">Start</button>
 			<button id="stopB" class="button" type="button" onclick="stop()">Stop</button>
 			</div>
@@ -64,20 +69,47 @@
 			var selection;
 			var started = false;
 			var data = [];
-			var url = 'paintr/api/send'
+			var url = 'paintr/api/send';
+
+			var startButton = document.getElementById('startB')
+			var stopB 		= document.getElementById('stopB')
+			stopB.disabled = true;
+
+			var newNameDiv = document.getElementById("newNameDiv");
+			newNameDiv.style.display = "none";
+			var newName = document.getElementById('newName');
+			var newnameBut = document.getElementById('newNameBut').onclick = function(){
+				if (newName.value != '') {
+					var xmlhttp = new XMLHttpRequest();
+					xmlhttp.open('post', 'paintr/api/create', false)
+					xmlhttp.send(JSON.stringify({'canvasTitle':newName.value}));
+					if (JSON.parse(xmlhttp.responseText)['respons'] === 'OK') {
+						document.location.reload();
+					};
+				};
+
+			};
 
 			function start() {
 				selection = document.getElementById('canvas').value;
-				if (selection === 'non') {
-					x.innerHTML = 'Warning: No canvas selected';
-					started = true;
+				if (selection === 'non' && newName.value === '') {
+					x.innerHTML = 'Type in a name for the new canvas';
+					newNameDiv.style.display = "block";
 				} else {
-					intervalID = setInterval(function(){getLocation()}, 2000);
+					newNameDiv.style.display = "none";
+					intervalID = setInterval(function(){getLocation()}, 1000);
+					startB.style.backgroundColor = "red";
+					startB.disabled = true;
+					stopB.disabled = false;
+					started = true;
 				}
 			}
 
 			function stop () {
 				clearInterval(intervalID)
+				startB.style.backgroundColor = "blue";
+				startB.disabled = false;
+				stopB.disabled = true;
 				x.innerHTML = 'Hit start again to keep tracking'
 
 				var xmlhttp = new XMLHttpRequest();

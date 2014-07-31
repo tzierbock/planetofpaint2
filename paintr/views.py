@@ -13,7 +13,7 @@ def create_canvas(request):
 	if request.method == 'POST':
 		data = json.loads(request.body)
 
-		newName = data['title']
+		newName = data['canvasTitle']
 		uuid = newName.replace(' ', '').lower() #remove spaces and make lower case
 
 		if len(uuid) > 10: uuid = uuid[:10]
@@ -25,10 +25,9 @@ def create_canvas(request):
 
 		newC.save()
 
-		respons = 'OK'
+		respons = "OK"
 
-	
-	return HttpResponse(json.load({'respons':respons}))
+	return HttpResponse(json.dumps({"respons":respons}))
 
 
 #data handeling
