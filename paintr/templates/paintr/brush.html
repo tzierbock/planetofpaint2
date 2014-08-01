@@ -95,45 +95,29 @@
       </header>
 
       <div class="content">
-          <select class="table-view" name="canvas" id="canvas">
-            <option class="table-view-cell" value="non">Please select a canvas to paint on</option>
-            {% for c in canvases %}
-              <option class="table-view-cell" value="{{ c.uuid }}">{{ c.title }}</option>
-            {% endfor %}
-          </select>
-
-        <form class="input-group">
-          <input type="text" placeholder="Full name">
-          <input type="email" placeholder="Email">
-          <input type="text" placeholder="Username">
-        </form>
-
-        <h5 class="content-padded">App settings</h5>
-
-        <ul class="table-view">
-          <li class="table-view-cell media">
-            <span class="media-object pull-left icon icon-sound"></span>
-            <div class="media-body">
-              Enable sounds
-            </div>
-            <div class="toggle">
-              <div class="toggle-handle"></div>
-            </div>
-          </li>
-          <li class="table-view-cell media">
-            <span class="media-object pull-left icon icon-person"></span>
-            <div class="media-body">
-              Parental controls
-            </div>
-            <div class="toggle">
-              <div class="toggle-handle"></div>
-            </div>
-          </li>
-        </ul>
-        <div class="content-padded">
-          <button class="btn btn-positive btn-block">Save settings</button>
-        </div>
+      <div class="content-padded">
+        <p>Toggle all the canvases you want to paint on</p>
       </div>
+        <ul class="table-view">
+
+          {% for c in canvases %}
+            <li class="table-view-cell">{{ c.title }}
+              <div class="toggle">
+                <div class="toggle-handle"></div>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+        
+        <div class="content-padded">
+        <p>or create a new one</p>
+        <form>
+          <input type="text" placeholder="New Canvas">
+          <button class="btn btn-positive btn-block">Create</button>
+        </form>
+      </div>
+      </div>
+      
     </div>
 
     <script>
