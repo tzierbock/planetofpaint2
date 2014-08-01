@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from datetime import datetime
 
 import json
-from models import Canvas, Point
+from models import Canvas, Line, Point
 
 
 #create new canvas from user request
@@ -30,7 +30,7 @@ def create_canvas(request):
 	return HttpResponse(json.dumps({"respons":respons}))
 
 
-#data handeling
+#data handling
 def receive_data(request):
 	respons = 'Failure'
 	if request.method == 'POST':
@@ -38,37 +38,54 @@ def receive_data(request):
 
 		canvas = get_object_or_404(Canvas, pk=data['uuid'])
 
+		# create a new line object and initialize it with the given parameters
+		newLine = Line()
+		newLine.line_type = data['line_type']
+		newLine.line_width = data['line_width']
+		newLine.line_color = data['line_color']
+
 		for point in data['points']:
 			newP = Point()
 			newP.latitude = point['latitude']
 			newP.longitude = point['longitude']
 
 			newP.creation_time = datetime.now()
-			newP.canvas = canvas
+			newP.line = newLine
 
 			newP.save()
 
-		respons = str(len(data['points']))
+		respons = "OK"
 
 	return HttpResponse(json.dumps({'respons':respons}))
 
 def get_data(request):
-	outData = {'respons':'Failure'}
+	outData = {
+		'respons':'Failure',
+		'lines': [],
+		}
+
 	if request.method == 'POST':
 		data = json.loads(request.body)
 
 		uuid = data['uuid']
 		canvas = get_object_or_404(Canvas, pk=uuid)
 
-		points = Point.objects.filter(canvas=canvas)
+		lines = Line.objects.filter(canvas=canvas)
 
-		pointData = [[p.latitude, p.longitude] for p in points]
+		for l in lines:
+			points = Point.objects.filter(line=l)
+			#convert to a format that leaflet understands
+			pointData = [[p.latitude, p.longitude] for p in points]
+			outData['lines'].append({
+					'type': l.line_type,
+					'width': l.line_width,
+					'color', l.line_color,
+					'points':pointData,
+				})
 
-		outData = {
-			'canvas': uuid,
-			'points': pointData,
-			'respons': 'OK',
-		}
+
+		outData['canvas'] = uuid
+		outData['respons'] = 'OK'
 
 	return HttpResponse(json.dumps(outData))
 
@@ -89,4 +106,3 @@ def brush_view(request):
 	canvases = Canvas.objects.all()
 
 	return render(request, 'paintr/brush.html', {'canvases': canvases})
-	

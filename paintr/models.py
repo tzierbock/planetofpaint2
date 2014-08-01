@@ -11,6 +11,14 @@ class Canvas(models.Model):
 	def __unicode__(self):
 		return self.title
 
+class Line(models.Model):
+	line_type = models.CharField(max_length=10)
+	line_width = models.FloatField()
+	line_color = models.CharField(max_length=10)
+	canvas = models.ForeignKey(Canvas, default=True)
+
+	def __unicode__(self):
+		return "Line"
 
 class Point(models.Model):
 	creation_time = models.DateTimeField()
@@ -18,7 +26,7 @@ class Point(models.Model):
 	latitude = models.FloatField()
 	longitude = models.FloatField()
 
-	canvas = models.ForeignKey(Canvas, default=True)
+	line = models.ForeignKey(Line, default=True)
 
 	def __unicode__(self):
 		return "Point"
