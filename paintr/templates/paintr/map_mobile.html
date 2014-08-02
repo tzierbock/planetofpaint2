@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Ratchet template page</title>
+
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+    <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+
+    <!-- Sets initial viewport load and disables zooming  -->
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+
+    <!-- Makes your prototype chrome-less once bookmarked to your phone's home screen -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+    <!-- Include the compiled Ratchet CSS -->
+    <link href="/static/ratchet/css/ratchet.css" rel="stylesheet">
+
+    <!-- Optionally, include either the iOS or Android theme -->
+    <link href="/static/ratchet/css/ratchet-theme-ios.css" rel="stylesheet">
+
+    <!-- Include the compiled Ratchet JS -->
+    <script src="/static/ratchet/js/ratchet.js"></script>
+  </head>
+  <body>
+
+    <!-- Make sure all your bars are the first things in your <body> -->
+    <header class="bar bar-nav">
+      <a class="icon icon-gear pull-right" href="#settingsModal"></a>
+      <h1 class="title">Planet of Paint</h1>
+    </header>
+
+    <!-- Wrap all non-bar HTML in the .content div (this is actually what scrolls) -->
+    <div class="content">
+      <!-- Note: For this slider example, you'll need some additional styles not included with Ratchet -->
+      <style>
+        
+        .slider .slide .tip {
+          display: block;
+          height: 150px;
+        }
+
+        .slider .slide .handel {
+          display: block;
+          height: 200px;
+        }
+
+        .slider .slide-group .slide-text {
+          position: absolute;
+          top: 45%;
+          left: 0;
+          width: 100%;
+          font-size: 24px;
+          color: #fff;
+          text-align: center;
+          text-shadow: 0 0 10px rgba(0,0,0,.5);
+        }
+
+        .map {
+          width: 100%;
+          height:100%;
+        }
+        
+      </style>
+
+      <div id='map' class='map'></div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+      <header class="bar bar-nav">
+        <a class="icon icon-close pull-right" href="#settingsModal"></a>
+        <h1 class="title">Settings</h1>
+      </header>
+
+      <div class="content">
+      <div class="content-padded">
+      <select class="button" name="canvas" id="button">
+        <option value="non">Select a canvas you want to view</option>
+        {% for c in canvases %}
+          <option value="{{ c.uuid }}">{{ c.title }}</option>
+        {% endfor %}
+      </select>
+      </div>
+      </div>
+      </div>
+      
+    </div>
+
+    <script>
+      var url = 'paintr/api/data/get'
+      var map = L.map('map').setView([53.884917,-1.871339], 6);
+
+      L.tileLayer('http://{s}.tiles.mapbox.com/v3/tomzierbock.j3dn793e/{z}/{x}/{y}.png', {
+          attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+          maxZoom: 20
+      }).addTo(map);
+
+      var getJSON = function(url, uuid, successHandler, errorHandler) {
+          var xhr = typeof XMLHttpRequest != 'undefined'
+              ? new XMLHttpRequest()
+              : new ActiveXObject('Microsoft.XMLHTTP');
+          xhr.open('post', url, true);
+          xhr.onreadystatechange = function() {
+            var status;
+            var data;
+            // http://xhr.spec.whatwg.org/#dom-xmlhttprequest-readystate
+            if (xhr.readyState == 4) { // `DONE`
+                status = xhr.status;
+                if (status == 200) {
+                  data = JSON.parse(xhr.responseText);
+                  successHandler && successHandler(data);
+                } else {
+                  document.getElementById('error').innerHtml = xhr.responseText;
+                  errorHandler && errorHandler(status);
+                }
+            }
+          };
+
+          xhr.send(JSON.stringify({'uuid':uuid}));
+      };
+
+      var successHandler = function(data){
+        if (data['respons'] == 'Failure') {
+          document.getElementById('error').innerHtml = "error"
+          return;
+        };
+
+
+        var lines = data['lines'];
+        for (var i = lines.length - 1; i >= 0; i--) {
+          var l = lines[i];
+          var points = l['points'];
+          L.polyline(points, {
+            color: l['color'],
+            weight: l['width'],
+          }).addTo(map);
+        };
+      };
+
+      var errorHandler = function(status){
+
+      };
+
+
+      document.getElementById('button').onchange = function (){
+        uuid = document.getElementById('button').value;
+
+        if (uuid != 'non') {
+          getJSON(url, uuid, successHandler, errorHandler);
+        };
+
+      };
+
+      function ifMobileRedirect(){
+        agent = navigator.userAgen.toLowerCase()
+
+        if (agen.search('mobile') > -1) {
+          window.location = "/go/mobile"
+        };
+      }
+
+    </script>
+
+  </body>
+</html>

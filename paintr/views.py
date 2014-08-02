@@ -40,9 +40,11 @@ def receive_data(request):
 
 		# create a new line object and initialize it with the given parameters
 		newLine = Line()
-		newLine.line_type = data['line_type']
-		newLine.line_width = data['line_width']
-		newLine.line_color = data['line_color']
+		newLine.line_type = data['type']
+		newLine.line_width = data['width']
+		newLine.line_color = data['color']
+		newLine.canvas = canvas;
+		newLine.save()
 
 		for point in data['points']:
 			newP = Point()
@@ -79,7 +81,7 @@ def get_data(request):
 			outData['lines'].append({
 					'type': l.line_type,
 					'width': l.line_width,
-					'color', l.line_color,
+					'color': l.line_color,
 					'points':pointData,
 				})
 
@@ -96,6 +98,11 @@ def map_view(request):
 	canvases = Canvas.objects.all()
 
 	return render(request, 'paintr/map.html', {'canvases': canvases})
+
+def map_view_mobile(request):
+	canvases = Canvas.objects.all()
+
+	return render(request, 'paintr/map_mobile.html', {'canvases': canvases})
 
 def tracker_view(request):
 	canvases = Canvas.objects.all()

@@ -51,6 +51,15 @@
 				{% endfor %}
 			</select>
 			<br/>
+			<select name="color" id="color_select">
+				<option value="red">Red</option>
+				<option value="blue">Blue</option>
+				<option value="yellow">Yellow</option>
+				<option value="green">Green</option>
+			</select>
+			<br/>
+			<input id="width_select" type="range" max="20" min="5" step="0.1">
+			<br/>
 			<div id="newNameDiv" class="newNameDiv">
 				<h2>Enter a name</h2>
 				<input type="text" id="newName"></input>
@@ -114,7 +123,11 @@
 			    xmlhttp.open("POST", url, true);
 			    xmlhttp.send(JSON.stringify({
 			    	'uuid': selection,
-			    	'points':data,
+			    	//test values
+			    	'type': 'normal',
+			    	'color': document.getElementById('color_select').value,
+			    	'width': document.getElementById('width_select').value,
+			    	'points': data,
 			    }));
 			    data = [];
 			}
